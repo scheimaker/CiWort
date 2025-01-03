@@ -1,9 +1,9 @@
 const admin = require("../config/firebase");
 const db = admin.firestore();
-db.settings({ ignoreUndefinedProperties: true });
+db.settings({ignoreUndefinedProperties: true});
 const measureExecutionTime = require("./performanceTester");
-const { v4: uuidv4 } = require("uuid");
-const {uniqBy, sortBy} = require('lodash');
+const {v4: uuidv4} = require("uuid");
+const {uniqBy, sortBy} = require("lodash");
 
 const FetchWordsCount = 100;
 
@@ -14,15 +14,15 @@ const fetchWordbanks = async (req, res) => {
 
     // Reference to the user's wordbanks collection
     const userWordbanksRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("wordbanks");
+        .collection("users")
+        .doc(userId)
+        .collection("wordbanks");
     const wordbanksSnapshot = await userWordbanksRef.get();
 
     if (wordbanksSnapshot.empty) {
       return res
-        .status(404)
-        .json({ message: "No wordbanks found for the user" });
+          .status(404)
+          .json({message: "No wordbanks found for the user"});
     }
 
     // Map wordbank documents to an array
@@ -31,19 +31,19 @@ const fetchWordbanks = async (req, res) => {
       ...doc.data(),
     }));
 
-    res.status(200).json({ wordbanks });
+    res.status(200).json({wordbanks});
   } catch (error) {
     console.error("Error fetching wordbanks:", error);
-    res.status(500).json({ message: "Failed to fetch wordbanks" });
+    res.status(500).json({message: "Failed to fetch wordbanks"});
   }
 };
 
 // Create a new wordbank for a user
 const createWordbank = async (req, res) => {
-  const { name } = req.body;
+  const {name} = req.body;
 
   if (!name || name.trim() === "") {
-    return res.status(400).json({ message: "Wordbank name is required" });
+    return res.status(400).json({message: "Wordbank name is required"});
   }
 
   try {
@@ -54,9 +54,9 @@ const createWordbank = async (req, res) => {
 
     // Reference to the user's wordbanks collection
     const userWordbanksRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("wordbanks");
+        .collection("users")
+        .doc(userId)
+        .collection("wordbanks");
 
     // Add a new wordbank document
     await userWordbanksRef.doc(wordbankId).set({
@@ -67,21 +67,21 @@ const createWordbank = async (req, res) => {
     });
 
     res
-      .status(201)
-      .json({ message: "Wordbank created successfully", id: wordbankId });
+        .status(201)
+        .json({message: "Wordbank created successfully", id: wordbankId});
   } catch (error) {
     console.error("Error creating wordbank:", error);
-    res.status(500).json({ message: "Failed to create wordbank" });
+    res.status(500).json({message: "Failed to create wordbank"});
   }
 };
 
 // Add words to a specific wordbank
 const addWordsToWordbank = async (req, res) => {
-  const { wordbankId, words } = req.body;
+  const {wordbankId, words} = req.body;
   if (!wordbankId || !Array.isArray(words) || words.length === 0) {
     return res
-      .status(400)
-      .json({ message: "Wordbank ID and words are required" });
+        .status(400)
+        .json({message: "Wordbank ID and words are required"});
   }
 
   try {
@@ -89,15 +89,15 @@ const addWordsToWordbank = async (req, res) => {
 
     // Reference to the specific wordbank document
     const wordbankRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("wordbanks")
-      .doc(wordbankId);
+        .collection("users")
+        .doc(userId)
+        .collection("wordbanks")
+        .doc(wordbankId);
 
     // Check if the wordbank exists
     const wordbankDoc = await wordbankRef.get();
     if (!wordbankDoc.exists) {
-      return res.status(404).json({ message: "Wordbank not found" });
+      return res.status(404).json({message: "Wordbank not found"});
     }
 
     // Get the current words array
@@ -117,12 +117,12 @@ const addWordsToWordbank = async (req, res) => {
     ];
 
     // Update the wordbank with the new words
-    await wordbankRef.update({ words: updatedWords });
+    await wordbankRef.update({words: updatedWords});
 
-    res.status(200).json({ message: "Words added successfully", wordbankId });
+    res.status(200).json({message: "Words added successfully", wordbankId});
   } catch (error) {
     console.error("Error adding words to wordbank:", error);
-    res.status(500).json({ message: "Failed to add words to wordbank" });
+    res.status(500).json({message: "Failed to add words to wordbank"});
   }
 };
 
@@ -137,15 +137,14 @@ const getWordsFromCurrentWordbank = async (req, res) => {
   const userDoc = await userRef.get();
 
   // Extract the currentWordbank field
-  const { currentWordbank } = userDoc.data();
+  const {currentWordbank} = userDoc.data();
   const wordbankId = currentWordbank.value;
   console.log("get wordbankId here:", currentWordbank);
   try {
-
     // Fetch words from the user's wordbank
     const userWordbankResponse = await getWordsFromUserWordbank(
-      wordbankId,
-      userId
+        wordbankId,
+        userId,
     );
 
     if (
@@ -153,58 +152,58 @@ const getWordsFromCurrentWordbank = async (req, res) => {
       userWordbankResponse.words.length === 0
     ) {
       return res
-        .status(404)
-        .json({ message: "No words found in the user wordbank" });
+          .status(404)
+          .json({message: "No words found in the user wordbank"});
     }
 
     // Sort words by wrongTimes and rightTimes
     const sortedWordIds = sortWords(userWordbankResponse.words);
-    
-    
+
+
     // Fetch word details from the main wordbank
     const mainWordDetails = await getWordsFromMainWordbank(sortedWordIds);
 
     // Combine user wordbank data with main wordbank details
     const combinedResults = sortedWordIds
-      .map((id) => {
-        const userWord = userWordbankResponse.words.find(
-          (word) => word.id === id
-        );
-        const mainWord = mainWordDetails.find((word) => word.id === id);
+        .map((id) => {
+          const userWord = userWordbankResponse.words.find(
+              (word) => word.id === id,
+          );
+          const mainWord = mainWordDetails.find((word) => word.id === id);
 
-        if (userWord && mainWord) {
-          return {
-            id: id,
-            ...mainWord, // Main wordbank details
-            wrongTimes: userWord.wrongTimes, // User-specific metadata
-            rightTimes: userWord.rightTimes,
-          };
-        }
-        return null; // If no matching main word is found
-      })
-      .filter(Boolean); // Remove any null values
+          if (userWord && mainWord) {
+            return {
+              id: id,
+              ...mainWord, // Main wordbank details
+              wrongTimes: userWord.wrongTimes, // User-specific metadata
+              rightTimes: userWord.rightTimes,
+            };
+          }
+          return null; // If no matching main word is found
+        })
+        .filter(Boolean); // Remove any null values
 
-    res.status(200).json({ words: combinedResults });
+    res.status(200).json({words: combinedResults});
   } catch (error) {
     console.error("Error fetching words from wordbank:", error);
-    res.status(500).json({ message: "Failed to fetch words from wordbank" });
+    res.status(500).json({message: "Failed to fetch words from wordbank"});
   }
 };
 
-//#region Helper Functions For getting words from  wordbank
+// #region Helper Functions For getting words from  wordbank
 const getWordsFromUserWordbank = async (wordbankId, userId) => {
   const wordbankRef = db
-    .collection("users")
-    .doc(userId)
-    .collection("wordbanks")
-    .doc(wordbankId);
+      .collection("users")
+      .doc(userId)
+      .collection("wordbanks")
+      .doc(wordbankId);
   const wordbankDoc = await wordbankRef.get();
 
   if (!wordbankDoc.exists) {
-    return { message: "Wordbank not found" };
+    return {message: "Wordbank not found"};
   }
 
-  return { words: wordbankDoc.data().words };
+  return {words: wordbankDoc.data().words};
 };
 
 const sortWords = (words) => {
@@ -216,14 +215,14 @@ const sortWords = (words) => {
 
   // Step 2: Combine and remove duplicates using lodash's `uniqBy`
   const combinedWords = uniqBy(
-    [...wordsWithWrongTimes, ...wordsWithRightTimesZero, ...wordsWithRightTimesOne],
-    'id' // Ensures unique words by their `id`
+      [...wordsWithWrongTimes, ...wordsWithRightTimesZero, ...wordsWithRightTimesOne],
+      "id", // Ensures unique words by their `id`
   );
 
   // Step 3: Sort the combined unique words
   const sortedWords = sortBy(
-    combinedWords,
-    [(word) => -word.wrongTimes, (word) => word.rightTimes] // Sort by wrongTimes descending, then rightTimes ascending
+      combinedWords,
+      [(word) => -word.wrongTimes, (word) => word.rightTimes], // Sort by wrongTimes descending, then rightTimes ascending
   );
 
   // Step 4: Extract the IDs of the top 100 words
@@ -240,7 +239,7 @@ const getWordsFromMainWordbank = async (topWordIds) => {
     for (const id of topWordIds) {
       const wordDoc = await wordbankCollection.doc(id).get();
       if (wordDoc.exists) {
-        mainWords.push({ id: wordDoc.id, ...wordDoc.data() });
+        mainWords.push({id: wordDoc.id, ...wordDoc.data()});
       }
     }
 
@@ -253,14 +252,14 @@ const getWordsFromMainWordbank = async (topWordIds) => {
   }
 };
 
-//#endregion
+// #endregion
 
 const updateWords = async (req, res) => {
-  const { wordbankId } = req.params; // Extract wordbankId from params
+  const {wordbankId} = req.params; // Extract wordbankId from params
   const wordsToUpdate = req.body; // Expecting a list of word objects [{ id, rightTimes, wrongTimes }, ...]
 
   if (!Array.isArray(wordsToUpdate) || wordsToUpdate.length === 0) {
-    return res.status(400).json({ message: 'A list of words to update is required' });
+    return res.status(400).json({message: "A list of words to update is required"});
   }
 
   try {
@@ -268,14 +267,14 @@ const updateWords = async (req, res) => {
 
     // Reference to the user's specific wordbank
     const wordbankRef = db
-      .collection('users')
-      .doc(userId)
-      .collection('wordbanks')
-      .doc(wordbankId);
+        .collection("users")
+        .doc(userId)
+        .collection("wordbanks")
+        .doc(wordbankId);
 
     const wordbankDoc = await wordbankRef.get();
     if (!wordbankDoc.exists) {
-      return res.status(404).json({ message: 'Wordbank not found' });
+      return res.status(404).json({message: "Wordbank not found"});
     }
 
     const wordbank = wordbankDoc.data();
@@ -286,23 +285,23 @@ const updateWords = async (req, res) => {
       if (update) {
         return {
           ...word,
-          ...(update.rightTimes !== undefined && { rightTimes: update.rightTimes || word.rightTimes }),
-          ...(update.wrongTimes !== undefined && { wrongTimes: update.wrongTimes || word.wrongTimes }),
+          ...(update.rightTimes !== undefined && {rightTimes: update.rightTimes || word.rightTimes}),
+          ...(update.wrongTimes !== undefined && {wrongTimes: update.wrongTimes || word.wrongTimes}),
           updated: [...(word.updated || []), new Date().toISOString()], // Add new timestamp
         };
       }
       return word; // Leave the word unchanged if it's not in the update list
     });
 
-    console.log('Updated words:', updatedWords);
+    console.log("Updated words:", updatedWords);
 
     // Update the wordbank document with the modified words array
-    await wordbankRef.update({ words: updatedWords });
+    await wordbankRef.update({words: updatedWords});
 
-    res.status(200).json({ message: 'Words updated successfully' });
+    res.status(200).json({message: "Words updated successfully"});
   } catch (error) {
-    console.error('Error updating words:', error);
-    res.status(500).json({ message: 'Failed to update words' });
+    console.error("Error updating words:", error);
+    res.status(500).json({message: "Failed to update words"});
   }
 };
 
@@ -313,15 +312,15 @@ const testFunction = async (req, res) => {
 
     // Reference to the user's wordbank collection
     const userWordbankRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("wordbank");
+        .collection("users")
+        .doc(userId)
+        .collection("wordbank");
     const userWordbankSnapshot = await userWordbankRef.get();
 
     if (userWordbankSnapshot.empty) {
       return res
-        .status(404)
-        .json({ message: "No words found in the user's wordbank" });
+          .status(404)
+          .json({message: "No words found in the user's wordbank"});
     }
 
     // Fetch all words from the user's wordbank
@@ -332,23 +331,23 @@ const testFunction = async (req, res) => {
 
     // Reference to the `wordbanks` collection for this user
     const chineseWordbankRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("wordbanks");
+        .collection("users")
+        .doc(userId)
+        .collection("wordbanks");
 
     // Check if the "Chinese" wordbank already exists
-    let chineseWordbankDoc = await chineseWordbankRef
-      .where("name", "==", "Chinese")
-      .get();
+    const chineseWordbankDoc = await chineseWordbankRef
+        .where("name", "==", "Chinese")
+        .get();
 
     let wordbankId;
     if (chineseWordbankDoc.empty) {
       // Create a new wordbank if "Chinese" doesn't exist
       wordbankId = db
-        .collection("users")
-        .doc(userId)
-        .collection("wordbanks")
-        .doc().id;
+          .collection("users")
+          .doc(userId)
+          .collection("wordbanks")
+          .doc().id;
       await chineseWordbankRef.doc(wordbankId).set({
         id: wordbankId,
         name: "Chinese",
@@ -364,9 +363,9 @@ const testFunction = async (req, res) => {
 
     // Fetch the current words in the "Chinese" wordbank
     const chineseWordbankDocSnapshot = await chineseWordbankDocRef.get();
-    const existingWords = chineseWordbankDocSnapshot.exists
-      ? chineseWordbankDocSnapshot.data().words || []
-      : [];
+    const existingWords = chineseWordbankDocSnapshot.exists ?
+      chineseWordbankDocSnapshot.data().words || [] :
+      [];
 
     // Combine the existing words with the new words (ensure no duplicates by `wordId`)
     const updatedWords = [
@@ -385,11 +384,11 @@ const testFunction = async (req, res) => {
 
     // Remove duplicate words based on `id`
     const uniqueWords = Array.from(
-      new Map(updatedWords.map((word) => [word.id, word])).values()
+        new Map(updatedWords.map((word) => [word.id, word])).values(),
     );
 
     // Update the "Chinese" wordbank with the combined words
-    await chineseWordbankDocRef.update({ words: uniqueWords });
+    await chineseWordbankDocRef.update({words: uniqueWords});
 
     res.status(200).json({
       message: "Words successfully exported to the 'Chinese' wordbank",
@@ -398,19 +397,19 @@ const testFunction = async (req, res) => {
   } catch (error) {
     console.error("Error exporting words to the 'Chinese' wordbank:", error);
     res
-      .status(500)
-      .json({ message: "Failed to export words to the 'Chinese' wordbank" });
+        .status(500)
+        .json({message: "Failed to export words to the 'Chinese' wordbank"});
   }
 };
 
 const setCurrentWordbank = async (req, res) => {
-  const { wordbankId } = req.body; // Extract userId and wordbankId from the request body
+  const {wordbankId} = req.body; // Extract userId and wordbankId from the request body
   const userId = req.uid; // Extract user ID from token
 
   if (!userId || !wordbankId) {
     return res
-      .status(400)
-      .json({ message: "Missing userId or wordbankId in the request" });
+        .status(400)
+        .json({message: "Missing userId or wordbankId in the request"});
   }
 
   try {
@@ -424,13 +423,13 @@ const setCurrentWordbank = async (req, res) => {
 
     console.log(`Current wordbank set to "${wordbankId}" for user "${userId}"`);
     return res
-      .status(200)
-      .json({ message: "Current wordbank updated successfully" });
+        .status(200)
+        .json({message: "Current wordbank updated successfully"});
   } catch (error) {
     console.error("Error updating currentWordbank:", error);
     return res
-      .status(500)
-      .json({ message: "Failed to update current wordbank" });
+        .status(500)
+        .json({message: "Failed to update current wordbank"});
   }
 };
 
@@ -438,7 +437,7 @@ const getCurrentWordbank = async (req, res) => {
   const userId = req.uid; // Extract user ID from token
 
   if (!userId) {
-    return res.status(400).json({ message: "Missing userId in the request" });
+    return res.status(400).json({message: "Missing userId in the request"});
   }
 
   try {
@@ -449,27 +448,27 @@ const getCurrentWordbank = async (req, res) => {
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({message: "User not found"});
     }
 
     // Extract the currentWordbank field
-    const { currentWordbank } = userDoc.data();
+    const {currentWordbank} = userDoc.data();
 
     if (!currentWordbank) {
       return res
-        .status(404)
-        .json({ message: "No current wordbank set for this user" });
+          .status(404)
+          .json({message: "No current wordbank set for this user"});
     }
 
     console.log(
-      `Current wordbank for user "${userId}" is "${currentWordbank.label}"`
+        `Current wordbank for user "${userId}" is "${currentWordbank.label}"`,
     );
-    return res.status(200).json({ currentWordbank });
+    return res.status(200).json({currentWordbank});
   } catch (error) {
     console.error("Error retrieving currentWordbank:", error);
     return res
-      .status(500)
-      .json({ message: "Failed to retrieve current wordbank" });
+        .status(500)
+        .json({message: "Failed to retrieve current wordbank"});
   }
 };
 
@@ -478,26 +477,26 @@ const lookupWord = async (req, res) => {
   const userId = req.uid; // Extract user ID from token
 
   if (!text) {
-    return res.status(400).json({ message: "Word text is required" });
+    return res.status(400).json({message: "Word text is required"});
   }
 
   try {
     // Step 1: Query the public "wordbank" collection for a matching word by text
     const publicWordbankSnapshot = await db
-      .collection("wordbank")
-      .where("text", "==", text)
-      .get();
+        .collection("wordbank")
+        .where("text", "==", text)
+        .get();
 
     if (publicWordbankSnapshot.empty) {
       return res
-        .status(404)
-        .json({ message: "Word not found in the public wordbank" });
+          .status(404)
+          .json({message: "Word not found in the public wordbank"});
     }
 
     // Collect matched word data from the public wordbank
     const matchedPublicWords = [];
     publicWordbankSnapshot.forEach((doc) => {
-      matchedPublicWords.push({ id: doc.id, ...doc.data() });
+      matchedPublicWords.push({id: doc.id, ...doc.data()});
     });
 
     // Step 2: Extract the IDs of the matched words from the public wordbank
@@ -505,10 +504,10 @@ const lookupWord = async (req, res) => {
 
     // Step 3: Query the user's wordbanks to check for matching words by ID
     const userWordbanksSnapshot = await db
-      .collection("users")
-      .doc(userId)
-      .collection("wordbanks")
-      .get();
+        .collection("users")
+        .doc(userId)
+        .collection("wordbanks")
+        .get();
 
     const matchedUserWordbanks = [];
 
@@ -516,7 +515,7 @@ const lookupWord = async (req, res) => {
     userWordbanksSnapshot.forEach((wordbankDoc) => {
       const wordbankData = wordbankDoc.data();
       const matchingWords = wordbankData.words.filter((word) =>
-        publicWordIds.includes(word.id)
+        publicWordIds.includes(word.id),
       );
 
       if (matchingWords.length > 0) {
@@ -530,8 +529,8 @@ const lookupWord = async (req, res) => {
     // If no matches are found in user's wordbanks
     if (matchedUserWordbanks.length === 0) {
       return res
-        .status(200)
-        .json({ message: "No matching words found in user's wordbanks" });
+          .status(200)
+          .json({message: "No matching words found in user's wordbanks"});
     }
 
     return res.status(200).json({
@@ -541,7 +540,7 @@ const lookupWord = async (req, res) => {
     });
   } catch (error) {
     console.error("Error looking up word:", error);
-    return res.status(500).json({ message: "Failed to lookup word" });
+    return res.status(500).json({message: "Failed to lookup word"});
   }
 };
 

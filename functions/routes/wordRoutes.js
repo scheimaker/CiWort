@@ -22,7 +22,11 @@ router.post("/wordbanks", verifyToken, createWordbank); // Create a new wordbank
 
 // Routes related to words within a specific wordbank
 router.post("/wordbanks/add-words", verifyToken, addWordsToWordbank); // Add words to a specific wordbank
-router.get("/getwords_currentwordbanks", verifyToken, getWordsFromCurrentWordbank); // Get words from a specific wordbank
+router.get(
+  "/getwords_currentwordbanks",
+  verifyToken,
+  getWordsFromCurrentWordbank
+); // Get words from a specific wordbank
 
 // Update a specific word within a user's wordbank
 router.put("/wordbanks/:wordbankId", verifyToken, updateWords); // Update a specific word

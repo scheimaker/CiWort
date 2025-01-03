@@ -17,4 +17,8 @@ export const getFirebaseIdToken = async () => {
     return idToken;
   };
   
-  export const BASE_URL = 'http://localhost:3000/api';
+  export const BASE_URL  = process.env.NODE_ENV === 'production'
+  ? 'https://<project-region>-<project-id>.cloudfunctions.net'
+  : 'http://localhost:3000/api';
+
+  // export const BASE_URL = 'https://ciwort.web.app';

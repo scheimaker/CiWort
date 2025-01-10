@@ -7,10 +7,15 @@ const wordRoutes = require('./routes/wordRoutes');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const functions = require('firebase-functions');
-const serviceAccount = require('./firebaseServiceAccountKey.json');
+// const serviceAccount = require('./firebaseServiceAccountKey.json');
 const admin = require('firebase-admin');
+
+const serviceAccountKey = JSON.parse(
+  Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8')
+);
+
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccountKey),
   databaseURL: 'https://ciwort.firebaseapp.com' // Replace with your database URL
 },"CiWort");
 
@@ -45,10 +50,10 @@ app.get('*', (req, res) => {
 
 
 // Start the server
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 
 exports.app = functions.https.onRequest(app);

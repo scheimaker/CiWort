@@ -10,9 +10,20 @@ const functions = require('firebase-functions');
 // const serviceAccount = require('./firebaseServiceAccountKey.json');
 const admin = require('firebase-admin');
 
-const serviceAccountKey = JSON.parse(
-  Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8')
-);
+// const serviceAccountKey = JSON.parse(
+//   Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8')
+// );
+var serviceAccountKey = "";
+// console.log("serviceAccountKey:",process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+try {
+   serviceAccountKey = JSON.parse(
+    Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8')
+  );
+  console.log('Firebase service account key loaded successfully');
+} catch (error) {
+  console.error('Failed to load Firebase service account key:', error);
+}
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccountKey),

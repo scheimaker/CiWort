@@ -1,5 +1,5 @@
 {
-  "name": "ciwort-backend",
+  "name": "heroku-ciwort",
   "version": "1.0.0",
   "description": "Backend for CiWort using Firebase and Express",
   "scripts": {

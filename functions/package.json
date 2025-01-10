@@ -2,12 +2,12 @@
   "name": "heroku-ciwort",
   "version": "1.0.0",
   "description": "Backend for CiWort using Firebase and Express",
-  
+
   "scripts": {    
     "start": "node server.js"
     },
   "engines": {
-    "node": "18"
+    "node": ">=16.x"
   },
   "main": "server.js",
   "dependencies": {

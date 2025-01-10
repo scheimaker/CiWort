@@ -2,12 +2,8 @@
   "name": "heroku-ciwort",
   "version": "1.0.0",
   "description": "Backend for CiWort using Firebase and Express",
-  "scripts": {
-    "serve": "firebase emulators:start --only functions",
-    "shell": "firebase functions:shell",
-    "start": "node server.js",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+  "scripts": {    
+    "start": "node server.js"   
   },
   "engines": {
     "node": "18"
